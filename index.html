@@ -1,4 +1,4 @@
-# Updated `index.html`
+# Single File Solution Using Only `index.html`
 
 ```html
 <!DOCTYPE html>
@@ -21,9 +21,8 @@
     .card {
       background: #1e293b;
       border: 1px solid #334155;
-      transition: 0.3s ease;
       border-radius: 12px;
-      overflow: hidden;
+      transition: 0.3s ease;
     }
 
     .card:hover {
@@ -38,6 +37,29 @@
       border-radius: 999px;
       font-size: 12px;
     }
+
+    #blogContent h1,
+    #blogContent h2,
+    #blogContent h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    #blogContent p {
+      margin-bottom: 16px;
+      line-height: 1.8;
+      color: #cbd5e1;
+    }
+
+    #blogContent ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    #blogContent li {
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 
@@ -46,27 +68,142 @@
   <nav class="border-b border-slate-700">
     <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
       <h1 class="text-2xl font-bold">AI Blog Demo</h1>
-      <a href="index.html" class="text-slate-300 hover:text-white">Home</a>
+
+      <button
+        onclick="goHome()"
+        class="text-slate-300 hover:text-white"
+      >
+        Home
+      </button>
     </div>
   </nav>
 
   <section class="max-w-6xl mx-auto px-6 py-10">
 
-    <div class="mb-10">
-      <h2 class="text-5xl font-bold mb-4">
-        AI Generated Blogs
-      </h2>
+    <div id="homePage">
 
-      <p class="text-slate-400 text-lg">
-        Fully automated using n8n + OpenAI + GitHub Pages
-      </p>
+      <div class="mb-10">
+        <h2 class="text-5xl font-bold mb-4">
+          AI Generated Blogs
+        </h2>
+
+        <p class="text-slate-400 text-lg">
+          Fully automated using n8n + OpenAI + GitHub Pages
+        </p>
+      </div>
+
+      <div id="blogContainer" class="grid md:grid-cols-3 gap-6"></div>
+
     </div>
 
-    <div id="blogContainer" class="grid md:grid-cols-3 gap-6"></div>
+    <div id="blogPage" class="hidden">
+      <button
+        onclick="goHome()"
+        class="mb-8 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg"
+      >
+        ← Back
+      </button>
+
+      <div id="blogContent"></div>
+    </div>
 
   </section>
 
-  <script src="scripts/loadBlogs.js"></script>
+  <script>
+
+    async function loadBlogs() {
+
+      const container = document.getElementById('blogContainer');
+
+      try {
+
+        const response = await fetch('./blogs/blogs.json');
+        const blogs = await response.json();
+
+        container.innerHTML = '';
+
+        blogs.forEach(blog => {
+
+          const card = document.createElement('div');
+
+          card.className = 'card p-6';
+
+          card.innerHTML = `
+            <div class="mb-4">
+              <span class="tag">${blog.category}</span>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-3">
+              ${blog.title}
+            </h3>
+
+            <p class="text-slate-400 mb-6">
+              ${blog.description}
+            </p>
+
+            <button
+              onclick="openBlog('${blog.file}')"
+              class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg w-full"
+            >
+              Read Blog
+            </button>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+
+        container.innerHTML = `
+          <div class="text-red-400">
+            Failed to load blogs.
+          </div>
+        `;
+
+        console.error(error);
+      }
+    }
+
+
+    async function openBlog(fileName) {
+
+      document.getElementById('homePage').classList.add('hidden');
+      document.getElementById('blogPage').classList.remove('hidden');
+
+      try {
+
+        const response = await fetch(`./blogs/${fileName}`);
+        const markdown = await response.text();
+
+        document.getElementById('blogContent').innerHTML = marked.parse(markdown);
+
+        window.scrollTo(0, 0);
+
+      } catch (error) {
+
+        document.getElementById('blogContent').innerHTML = `
+          <div class="text-red-400">
+            Failed to load blog.
+          </div>
+        `;
+
+        console.error(error);
+      }
+    }
+
+
+    function goHome() {
+
+      document.getElementById('blogPage').classList.add('hidden');
+      document.getElementById('homePage').classList.remove('hidden');
+
+      window.scrollTo(0, 0);
+    }
+
+
+    loadBlogs();
+
+  </script>
 
 </body>
 </html>
@@ -74,7 +211,7 @@
 
 ---
 
-# Create / Update `blogs/blogs.json`
+# `blogs/blogs.json`
 
 ```json
 [
@@ -88,124 +225,23 @@
     "title": "Power BI Trends",
     "file": "power-bi-trends.md",
     "category": "Analytics",
-    "description": "Latest trends in Power BI dashboards"
+    "description": "Latest Power BI dashboard trends"
   }
 ]
 ```
 
 ---
 
-# Create `scripts/loadBlogs.js`
+# Folder Structure
 
-```javascript
-async function loadBlogs() {
-  const container = document.getElementById('blogContainer');
-
-  try {
-    const response = await fetch('./blogs/blogs.json');
-    const blogs = await response.json();
-
-    container.innerHTML = '';
-
-    blogs.forEach(blog => {
-      const card = document.createElement('div');
-
-      card.className = 'card p-6 flex flex-col justify-between';
-
-      card.innerHTML = `
-        <div>
-          <div class="mb-4">
-            <span class="tag">${blog.category}</span>
-          </div>
-
-          <h3 class="text-2xl font-bold mb-3">
-            ${blog.title}
-          </h3>
-
-          <p class="text-slate-400 mb-6">
-            ${blog.description}
-          </p>
-        </div>
-
-        <a
-          href="blog.html?file=${blog.file}"
-          class="mt-auto inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center"
-        >
-          Read Blog
-        </a>
-      `;
-
-      container.appendChild(card);
-    });
-
-  } catch (error) {
-    console.error('Error loading blogs:', error);
-
-    container.innerHTML = `
-      <div class="text-red-400">
-        Failed to load blogs.
-      </div>
-    `;
-  }
-}
-
-loadBlogs();
-```
-
----
-
-# Create `blog.html`
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blog</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-</head>
-
-<body class="bg-slate-900 text-white min-h-screen">
-
-  <div class="max-w-4xl mx-auto px-6 py-10">
-
-    <a href="index.html" class="text-blue-400 hover:text-blue-300">
-      ← Back to Blogs
-    </a>
-
-    <div id="content" class="prose prose-invert max-w-none mt-8"></div>
-
-  </div>
-
-  <script>
-    async function loadBlog() {
-      const params = new URLSearchParams(window.location.search);
-      const file = params.get('file');
-
-      if (!file) {
-        document.getElementById('content').innerHTML = 'Blog not found';
-        return;
-      }
-
-      try {
-        const response = await fetch(`./blogs/${file}`);
-        const markdown = await response.text();
-
-        document.getElementById('content').innerHTML = marked.parse(markdown);
-
-      } catch (error) {
-        document.getElementById('content').innerHTML = 'Failed to load blog';
-      }
-    }
-
-    loadBlog();
-  </script>
-
-</body>
-</html>
+```text
+blogs/
+│
+├── ai-in-finance.md
+├── power-bi-trends.md
+├── blogs.json
+│
+index.html
 ```
 
 ---
