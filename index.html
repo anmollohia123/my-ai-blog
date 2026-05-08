@@ -1,4 +1,6 @@
-<!-- FILE: index.html -->
+# Updated `index.html`
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,16 +15,28 @@
     body {
       background: #0f172a;
       color: white;
+      font-family: Arial, sans-serif;
     }
 
     .card {
       background: #1e293b;
       border: 1px solid #334155;
+      transition: 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .card:hover {
       transform: translateY(-5px);
-      transition: 0.3s;
+      border-color: #64748b;
+    }
+
+    .tag {
+      background: #334155;
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -30,7 +44,7 @@
 <body class="min-h-screen">
 
   <nav class="border-b border-slate-700">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between">
+    <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
       <h1 class="text-2xl font-bold">AI Blog Demo</h1>
       <a href="index.html" class="text-slate-300 hover:text-white">Home</a>
     </div>
@@ -56,3 +70,159 @@
 
 </body>
 </html>
+```
+
+---
+
+# Create / Update `blogs/blogs.json`
+
+```json
+[
+  {
+    "title": "AI in Finance",
+    "file": "ai-in-finance.md",
+    "category": "Finance",
+    "description": "How AI is transforming finance operations"
+  },
+  {
+    "title": "Power BI Trends",
+    "file": "power-bi-trends.md",
+    "category": "Analytics",
+    "description": "Latest trends in Power BI dashboards"
+  }
+]
+```
+
+---
+
+# Create `scripts/loadBlogs.js`
+
+```javascript
+async function loadBlogs() {
+  const container = document.getElementById('blogContainer');
+
+  try {
+    const response = await fetch('./blogs/blogs.json');
+    const blogs = await response.json();
+
+    container.innerHTML = '';
+
+    blogs.forEach(blog => {
+      const card = document.createElement('div');
+
+      card.className = 'card p-6 flex flex-col justify-between';
+
+      card.innerHTML = `
+        <div>
+          <div class="mb-4">
+            <span class="tag">${blog.category}</span>
+          </div>
+
+          <h3 class="text-2xl font-bold mb-3">
+            ${blog.title}
+          </h3>
+
+          <p class="text-slate-400 mb-6">
+            ${blog.description}
+          </p>
+        </div>
+
+        <a
+          href="blog.html?file=${blog.file}"
+          class="mt-auto inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center"
+        >
+          Read Blog
+        </a>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error('Error loading blogs:', error);
+
+    container.innerHTML = `
+      <div class="text-red-400">
+        Failed to load blogs.
+      </div>
+    `;
+  }
+}
+
+loadBlogs();
+```
+
+---
+
+# Create `blog.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen">
+
+  <div class="max-w-4xl mx-auto px-6 py-10">
+
+    <a href="index.html" class="text-blue-400 hover:text-blue-300">
+      ← Back to Blogs
+    </a>
+
+    <div id="content" class="prose prose-invert max-w-none mt-8"></div>
+
+  </div>
+
+  <script>
+    async function loadBlog() {
+      const params = new URLSearchParams(window.location.search);
+      const file = params.get('file');
+
+      if (!file) {
+        document.getElementById('content').innerHTML = 'Blog not found';
+        return;
+      }
+
+      try {
+        const response = await fetch(`./blogs/${file}`);
+        const markdown = await response.text();
+
+        document.getElementById('content').innerHTML = marked.parse(markdown);
+
+      } catch (error) {
+        document.getElementById('content').innerHTML = 'Failed to load blog';
+      }
+    }
+
+    loadBlog();
+  </script>
+
+</body>
+</html>
+```
+
+---
+
+# Important
+
+Whenever you add a new blog markdown file inside `/blogs`, simply add one more object in `blogs.json`.
+
+Example:
+
+```json
+{
+  "title": "Future of AI Audits",
+  "file": "future-ai-audit.md",
+  "category": "Audit",
+  "description": "How AI is changing statutory audits"
+}
+```
+
+Then it will automatically appear on the homepage without changing HTML.
