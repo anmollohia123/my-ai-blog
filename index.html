@@ -1,264 +1,298 @@
-# Single File Solution Using Only `index.html`
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Blog Demo</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Blog</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       background: #0f172a;
-      color: white;
-      font-family: Arial, sans-serif;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
     }
 
-    .card {
+    header {
+      background: #1e293b;
+      padding: 32px 24px;
+      border-bottom: 1px solid #334155;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #94a3b8;
+      font-size: 16px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .status {
+      text-align: center;
+      padding: 40px 16px;
+      color: #94a3b8;
+    }
+
+    .status.error { color: #f87171; }
+
+    .blog-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .blog-card {
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 12px;
-      transition: 0.3s ease;
+      padding: 24px;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: pointer;
     }
 
-    .card:hover {
-      transform: translateY(-5px);
+    .blog-card:hover {
       border-color: #64748b;
+      transform: translateY(-2px);
     }
 
-    .tag {
-      background: #334155;
+    .blog-title {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #f1f5f9;
+    }
+
+    .blog-meta {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .blog-preview {
       color: #cbd5e1;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
+      font-size: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    #blogContent h1,
-    #blogContent h2,
-    #blogContent h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    #blogContent p {
-      margin-bottom: 16px;
-      line-height: 1.8;
-      color: #cbd5e1;
-    }
-
-    #blogContent ul {
-      margin-left: 20px;
+    .blog-content {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
       margin-bottom: 20px;
     }
 
-    #blogContent li {
-      margin-bottom: 8px;
+    .blog-content h1, .blog-content h2, .blog-content h3 {
+      margin: 20px 0 12px;
+      color: #f1f5f9;
     }
+    .blog-content h1 { font-size: 28px; }
+    .blog-content h2 { font-size: 22px; }
+    .blog-content h3 { font-size: 18px; }
+    .blog-content p { margin: 12px 0; }
+
+    .blog-content code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 14px;
+    }
+
+    .blog-content pre {
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    .blog-content pre code { background: transparent; padding: 0; }
+
+    .blog-content ul, .blog-content ol { margin: 12px 0 12px 24px; }
+    .blog-content a { color: #60a5fa; text-decoration: none; }
+    .blog-content a:hover { text-decoration: underline; }
+
+    .blog-content blockquote {
+      border-left: 3px solid #475569;
+      padding-left: 16px;
+      margin: 16px 0;
+      color: #94a3b8;
+    }
+
+    .blog-content img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+
+    .back-btn {
+      background: #334155;
+      color: #e2e8f0;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .back-btn:hover { background: #475569; }
   </style>
 </head>
+<body>
+  <header onclick="renderList()">
+    <h1>AI Blog</h1>
+    <p>Notes and writing on AI, automation, and tooling</p>
+  </header>
 
-<body class="min-h-screen">
-
-  <nav class="border-b border-slate-700">
-    <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-      <h1 class="text-2xl font-bold">AI Blog Demo</h1>
-
-      <button
-        onclick="goHome()"
-        class="text-slate-300 hover:text-white"
-      >
-        Home
-      </button>
-    </div>
-  </nav>
-
-  <section class="max-w-6xl mx-auto px-6 py-10">
-
-    <div id="homePage">
-
-      <div class="mb-10">
-        <h2 class="text-5xl font-bold mb-4">
-          AI Generated Blogs
-        </h2>
-
-        <p class="text-slate-400 text-lg">
-          Fully automated using n8n + OpenAI + GitHub Pages
-        </p>
-      </div>
-
-      <div id="blogContainer" class="grid md:grid-cols-3 gap-6"></div>
-
-    </div>
-
-    <div id="blogPage" class="hidden">
-      <button
-        onclick="goHome()"
-        class="mb-8 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg"
-      >
-        ← Back
-      </button>
-
-      <div id="blogContent"></div>
-    </div>
-
-  </section>
+  <main id="app">
+    <div class="status">Loading blogs…</div>
+  </main>
 
   <script>
+    // -----------------------------------------------------------
+    // CONFIG: list your blogs here. The filenames must exist in blogs/
+    // To add a new blog: drop the .md file in /blogs and add its name
+    // to this array (or to blogs.json if you prefer keeping it separate).
+    // -----------------------------------------------------------
+    const BLOGS_FOLDER = "blogs";
 
-    async function loadBlogs() {
+    // Try blogs.json first; fall back to this hardcoded list if blogs.json is missing.
+    const FALLBACK_FILES = [
+      "ai-in-finance.md",
+      "power-bi-trends.md"
+    ];
 
-      const container = document.getElementById('blogContainer');
+    const app = document.getElementById("app");
 
+    async function loadBlogManifest() {
+      // Prefer blogs.json so user can add files without editing index.html
       try {
+        const res = await fetch(`${BLOGS_FOLDER}/blogs.json`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          // Accept either: ["foo.md", "bar.md"] OR [{file:"foo.md", title:"Foo"}]
+          if (Array.isArray(data)) {
+            return data.map(item =>
+              typeof item === "string" ? { file: item } : item
+            );
+          }
+        }
+      } catch (_) { /* fall through */ }
 
-        const response = await fetch('./blogs/blogs.json');
-        const blogs = await response.json();
+      return FALLBACK_FILES.map(f => ({ file: f }));
+    }
 
-        container.innerHTML = '';
+    async function fetchMarkdown(filename) {
+      const res = await fetch(`${BLOGS_FOLDER}/${filename}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`Could not load ${filename} (${res.status})`);
+      return await res.text();
+    }
 
-        blogs.forEach(blog => {
+    function extractTitle(markdown, fallback) {
+      const m = markdown.match(/^#\s+(.+)$/m);
+      return m ? m[1].trim() : fallback;
+    }
 
-          const card = document.createElement('div');
+    function extractPreview(markdown) {
+      const lines = markdown
+        .split("\n")
+        .map(l => l.trim())
+        .filter(l => l && !l.startsWith("#") && !l.startsWith("```") && !l.startsWith("---"));
+      return lines.slice(0, 3).join(" ").substring(0, 280);
+    }
 
-          card.className = 'card p-6';
+    function prettyName(filename) {
+      return filename
+        .replace(/\.md$/, "")
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
 
-          card.innerHTML = `
-            <div class="mb-4">
-              <span class="tag">${blog.category}</span>
-            </div>
+    async function renderList() {
+      app.innerHTML = `<div class="status">Loading blogs…</div>`;
+      try {
+        const manifest = await loadBlogManifest();
 
-            <h3 class="text-2xl font-bold mb-3">
-              ${blog.title}
-            </h3>
+        if (manifest.length === 0) {
+          app.innerHTML = `<div class="status">No blogs found yet.</div>`;
+          return;
+        }
 
-            <p class="text-slate-400 mb-6">
-              ${blog.description}
-            </p>
+        // Load each markdown in parallel
+        const blogs = await Promise.all(manifest.map(async (entry) => {
+          try {
+            const md = await fetchMarkdown(entry.file);
+            return {
+              file: entry.file,
+              markdown: md,
+              title: entry.title || extractTitle(md, prettyName(entry.file)),
+              preview: extractPreview(md),
+              ok: true
+            };
+          } catch (err) {
+            return { file: entry.file, error: err.message, ok: false };
+          }
+        }));
 
-            <button
-              onclick="openBlog('${blog.file}')"
-              class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg w-full"
-            >
-              Read Blog
-            </button>
-          `;
+        const successful = blogs.filter(b => b.ok);
+        if (successful.length === 0) {
+          app.innerHTML = `<div class="status error">Could not load any blog posts. Check the blogs/ folder.</div>`;
+          return;
+        }
 
-          container.appendChild(card);
-        });
-
-      } catch (error) {
-
-        container.innerHTML = `
-          <div class="text-red-400">
-            Failed to load blogs.
+        const html = `
+          <div class="blog-list">
+            ${successful.map((b, i) => `
+              <div class="blog-card" onclick="renderBlog(${i})">
+                <div class="blog-title">${escapeHtml(b.title)}</div>
+                <div class="blog-meta">${escapeHtml(b.file)}</div>
+                <div class="blog-preview">${escapeHtml(b.preview)}</div>
+              </div>
+            `).join("")}
           </div>
         `;
 
-        console.error(error);
+        app.innerHTML = html;
+        // Stash for the detail view
+        window._blogs = successful;
+      } catch (err) {
+        console.error(err);
+        app.innerHTML = `<div class="status error">Error loading blogs: ${escapeHtml(err.message)}</div>`;
       }
     }
 
+    function renderBlog(index) {
+      const blog = window._blogs?.[index];
+      if (!blog) { renderList(); return; }
 
-    async function openBlog(fileName) {
-
-      document.getElementById('homePage').classList.add('hidden');
-      document.getElementById('blogPage').classList.remove('hidden');
-
-      try {
-
-        const response = await fetch(`./blogs/${fileName}`);
-        const markdown = await response.text();
-
-        document.getElementById('blogContent').innerHTML = marked.parse(markdown);
-
-        window.scrollTo(0, 0);
-
-      } catch (error) {
-
-        document.getElementById('blogContent').innerHTML = `
-          <div class="text-red-400">
-            Failed to load blog.
-          </div>
-        `;
-
-        console.error(error);
-      }
+      const html = marked.parse(blog.markdown);
+      app.innerHTML = `
+        <button class="back-btn" onclick="renderList()">← Back to all posts</button>
+        <article class="blog-content">${html}</article>
+      `;
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-
-    function goHome() {
-
-      document.getElementById('blogPage').classList.add('hidden');
-      document.getElementById('homePage').classList.remove('hidden');
-
-      window.scrollTo(0, 0);
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
-
-    loadBlogs();
-
+    // Kick things off
+    renderList();
   </script>
-
 </body>
 </html>
-```
-
----
-
-# `blogs/blogs.json`
-
-```json
-[
-  {
-    "title": "AI in Finance",
-    "file": "ai-in-finance.md",
-    "category": "Finance",
-    "description": "How AI is transforming finance operations"
-  },
-  {
-    "title": "Power BI Trends",
-    "file": "power-bi-trends.md",
-    "category": "Analytics",
-    "description": "Latest Power BI dashboard trends"
-  }
-]
-```
-
----
-
-# Folder Structure
-
-```text
-blogs/
-│
-├── ai-in-finance.md
-├── power-bi-trends.md
-├── blogs.json
-│
-index.html
-```
-
----
-
-# Important
-
-Whenever you add a new blog markdown file inside `/blogs`, simply add one more object in `blogs.json`.
-
-Example:
-
-```json
-{
-  "title": "Future of AI Audits",
-  "file": "future-ai-audit.md",
-  "category": "Audit",
-  "description": "How AI is changing statutory audits"
-}
-```
-
-Then it will automatically appear on the homepage without changing HTML.
