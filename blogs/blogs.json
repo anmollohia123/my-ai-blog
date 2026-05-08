@@ -1,17 +1,14 @@
-// FILE: blogs/blogs.json
-
 [
   {
     "title": "AI in Finance",
-    "description": "How AI is transforming finance in 2026",
-    "date": "2026-05-08",
-    "file": "ai-in-finance.md"
+    "file": "ai-in-finance.md",
+    "category": "Finance",
+    "description": "How AI is transforming finance operations"
   },
-
   {
     "title": "Power BI Trends",
-    "description": "Latest Power BI trends for analytics",
-    "date": "2026-05-07",
-    "file": "power-bi-trends.md"
+    "file": "power-bi-trends.md",
+    "category": "Analytics",
+    "description": "Latest trends in Power BI dashboards"
   }
 ]
